@@ -13,6 +13,16 @@ interface PacketMonitorPanelProps {
   onNodeClick?: (nodeId: string) => void;
 }
 
+const COLUMN_WIDTHS = {
+  'packet-table_time': '15ch',
+  'packet-table_from-node': '30ch',
+  'packet-table_to-node': '30ch',
+  'packet-table_channel': '4ch',
+  'packet-table_snr': '4ch',
+  'packet-table_hops': '4ch',
+  'packet-table_size': '6ch',
+} as const;
+
 const PacketMonitorPanel: React.FC<PacketMonitorPanelProps> = ({ onClose, onNodeClick }) => {
   const { hasPermission, authStatus } = useAuth();
   const { timeFormat, dateFormat } = useSettings();
@@ -47,9 +57,19 @@ const PacketMonitorPanel: React.FC<PacketMonitorPanelProps> = ({ onClose, onNode
     }
     return rawPackets;
   }, [rawPackets, hideOwnPackets, ownNodeNum]);
+  const typeColumnWidth = React.useMemo(() => {
+    const paddingChars = 5;
+    const defaultWidth = 12;
+    const longestLabel = packets.reduce((max, packet) => {
+      const label = packet.portnum_name ?? String(packet.portnum ?? '');
+      return Math.max(max, label.length);
+    }, 0);
+    const totalChars = Math.max(longestLabel + paddingChars, defaultWidth);
+    return `${totalChars}ch`;
+  }, [packets]);
 
   // Helper function to truncate long names
-  const truncateLongName = (longName: string | undefined, maxLength: number = 20): string | undefined => {
+  const truncateLongName = (longName: string | undefined, maxLength: number = 30): string | undefined => {
     if (!longName) return undefined;
     return longName.length > maxLength ? `${longName.substring(0, maxLength)}...` : longName;
   };
@@ -262,17 +282,28 @@ const PacketMonitorPanel: React.FC<PacketMonitorPanelProps> = ({ onClose, onNode
           <div className="no-packets">No packets logged yet</div>
         ) : (
           <table className="packet-table">
+            <colgroup>
+              <col style={{ width: COLUMN_WIDTHS['packet-table_time'], maxWidth: COLUMN_WIDTHS['packet-table_time'] }} />
+              <col style={{ width: COLUMN_WIDTHS['packet-table_from-node'], maxWidth: COLUMN_WIDTHS['packet-table_from-node'] }} />
+              <col style={{ width: COLUMN_WIDTHS['packet-table_to-node'], maxWidth: COLUMN_WIDTHS['packet-table_to-node'] }} />
+              <col style={{ width: typeColumnWidth, maxWidth: typeColumnWidth }} />
+              <col style={{ width: COLUMN_WIDTHS['packet-table_channel'], maxWidth: COLUMN_WIDTHS['packet-table_channel'] }} />
+              <col style={{ width: COLUMN_WIDTHS['packet-table_snr'], maxWidth: COLUMN_WIDTHS['packet-table_snr'] }} />
+              <col style={{ width: COLUMN_WIDTHS['packet-table_hops'], maxWidth: COLUMN_WIDTHS['packet-table_hops'] }} />
+              <col style={{ width: COLUMN_WIDTHS['packet-table_size'], maxWidth: COLUMN_WIDTHS['packet-table_size'] }} />
+              <col />
+            </colgroup>
             <thead>
               <tr>
-                <th>Time</th>
-                <th>From</th>
-                <th>To</th>
-                <th>Type</th>
-                <th>Ch</th>
-                <th>SNR</th>
-                <th>Hops</th>
-                <th>Size</th>
-                <th>Content</th>
+                <th className="packet-table_timestamp">Time</th>
+                <th className="packet-table_from-node">From</th>
+                <th className="packet-table_to-node">To</th>
+                <th className="packet-table_portnum">Type</th>
+                <th className="packet-table_channel">Ch</th>
+                <th className="packet-table_snr">SNR</th>
+                <th className="packet-table_hops">Hops</th>
+                <th className="packet-table_size">Size</th>
+                <th className="packet-table_content">Content</th>
               </tr>
             </thead>
             <tbody>
@@ -284,10 +315,10 @@ const PacketMonitorPanel: React.FC<PacketMonitorPanelProps> = ({ onClose, onNode
                     onClick={() => setSelectedPacket(packet)}
                     className={selectedPacket?.id === packet.id ? 'selected' : ''}
                   >
-                    <td className="timestamp" title={formatDateTime(new Date(packet.timestamp * 1000), timeFormat, dateFormat)}>
+                    <td className="packet-table_timestamp" title={formatDateTime(new Date(packet.timestamp * 1000), timeFormat, dateFormat)}>
                       {formatTimestamp(packet.timestamp)}
                     </td>
-                    <td className="from-node" title={packet.from_node_longName || packet.from_node_id || ''}>
+                    <td className="packet-table_from-node" title={packet.from_node_longName || packet.from_node_id || ''}>
                       {packet.from_node_id && onNodeClick ? (
                         <span
                           className="node-id-link"
@@ -299,7 +330,7 @@ const PacketMonitorPanel: React.FC<PacketMonitorPanelProps> = ({ onClose, onNode
                         truncateLongName(packet.from_node_longName) || packet.from_node_id || packet.from_node
                       )}
                     </td>
-                    <td className="to-node" title={packet.to_node_longName || packet.to_node_id || ''}>
+                    <td className="packet-table_to-node" title={packet.to_node_longName || packet.to_node_id || ''}>
                       {packet.to_node_id === '!ffffffff' ? (
                         'Broadcast'
                       ) : packet.to_node_id && onNodeClick ? (
@@ -314,17 +345,17 @@ const PacketMonitorPanel: React.FC<PacketMonitorPanelProps> = ({ onClose, onNode
                       )}
                     </td>
                     <td
-                      className="portnum"
+                      className="packet-table_portnum"
                       style={{ color: getPortnumColor(packet.portnum) }}
                       title={packet.portnum_name || ''}
                     >
                       {packet.portnum_name || packet.portnum}
                     </td>
-                    <td className="channel">{packet.channel ?? 'N/A'}</td>
-                    <td className="snr">{packet.snr !== null && packet.snr !== undefined ? `${packet.snr.toFixed(1)}` : 'N/A'}</td>
-                    <td className="hops">{hops !== null ? hops : 'N/A'}</td>
-                    <td className="size">{packet.payload_size ?? 'N/A'}</td>
-                    <td className="content">
+                    <td className="packet-table_channel">{packet.channel ?? 'N/A'}</td>
+                    <td className="packet-table_snr">{packet.snr !== null && packet.snr !== undefined ? `${packet.snr.toFixed(1)}` : 'N/A'}</td>
+                    <td className="packet-table_hops">{hops !== null ? hops : 'N/A'}</td>
+                    <td className="packet-table_size">{packet.payload_size ?? 'N/A'}</td>
+                    <td className="packet-table_content">
                       {packet.encrypted ? (
                         <span className="encrypted-indicator">🔒 &lt;ENCRYPTED&gt;</span>
                       ) : (

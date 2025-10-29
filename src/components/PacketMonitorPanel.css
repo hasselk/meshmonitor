@@ -176,6 +176,41 @@
   white-space: nowrap;
 }
 
+.packet-table th.packet-table_timestamp,
+.packet-table td.packet-table_timestamp {
+  width: 15ch;
+  max-width: 15ch;
+}
+
+.packet-table th.packet-table_from-node,
+.packet-table td.packet-table_from-node,
+.packet-table th.packet-table_to-node,
+.packet-table td.packet-table_to-node {
+  width: 30ch;
+  max-width: 30ch;
+}
+
+.packet-table th.packet-table_channel,
+.packet-table td.packet-table_channel,
+.packet-table th.packet-table_snr,
+.packet-table td.packet-table_snr,
+.packet-table th.packet-table_hops,
+.packet-table td.packet-table_hops {
+  width: 4ch;
+  max-width: 4ch;
+}
+
+.packet-table th.packet-table_size,
+.packet-table td.packet-table_size {
+  width: 6ch;
+  max-width: 6ch;
+}
+
+.packet-table th.packet-table_content,
+.packet-table td.packet-table_content {
+  width: auto;
+  max-width: none;
+}
 .packet-table tbody tr {
   cursor: pointer;
   transition: background 0.2s;
@@ -198,14 +233,14 @@
   text-overflow: ellipsis;
 }
 
-.packet-table .timestamp {
+.packet-table .packet-table_timestamp {
   font-family: 'Courier New', monospace;
   font-size: 11px;
   color: var(--text-secondary);
 }
 
-.packet-table .from-node,
-.packet-table .to-node {
+.packet-table .packet-table_from-node,
+.packet-table .packet-table_to-node {
   font-family: 'Courier New', monospace;
   font-size: 11px;
 }
@@ -223,25 +258,26 @@
   text-decoration-style: solid;
 }
 
-.packet-table .portnum {
+.packet-table .packet-table_portnum {
   font-weight: 600;
   font-size: 11px;
 }
 
-.packet-table .channel {
+.packet-table .packet-table_channel {
   text-align: center;
   font-family: 'Courier New', monospace;
 }
 
-.packet-table .snr,
-.packet-table .hops,
-.packet-table .size {
+.packet-table .packet-table_snr,
+.packet-table .packet-table_hops,
+.packet-table .packet-table_size {
   text-align: right;
   font-family: 'Courier New', monospace;
 }
 
-.packet-table .content {
-  max-width: 300px;
+.packet-table .packet-table_content {
+  width: auto;
+  max-width: none;
   overflow: hidden;
   text-overflow: ellipsis;
 }
